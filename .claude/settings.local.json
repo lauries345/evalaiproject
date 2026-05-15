@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Get-ChildItem -Path \"c:\\\\Users\\\\lauri\\\\Documents\\\\MyCode\\\\C++\\\\EvalAIProject\" -Recurse -Force)",
+      "Bash(Select-Object -Property FullName, PSIsContainer)",
+      "Bash(Sort-Object FullName)",
+      "PowerShell(Get-ChildItem -Path \"c:\\\\Users\\\\lauri\\\\Documents\\\\MyCode\\\\C++\\\\EvalAIProject\" -Recurse | ForEach-Object { $_.FullName })",
+      "Read(//mnt/c/Users/lauri/Documents/MyCode/C++/EvalAIProject/**)",
+      "Bash(cmake --build . --target coverage)",
+      "Bash(lcov --version)",
+      "Bash(cmake --build \"c:/Users/lauri/Documents/MyCode/C++/EvalAIProject/build-cov\" --target coverage)",
+      "PowerShell(cmake --build \"c:\\\\Users\\\\lauri\\\\Documents\\\\MyCode\\\\C++\\\\EvalAIProject\\\\build-cov\" --target coverage 2>&1)",
+      "Bash(wsl.exe bash *)"
+    ]
+  }
+}

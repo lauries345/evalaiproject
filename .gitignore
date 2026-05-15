@@ -1,7 +1,9 @@
 build/
+build-cov/
 out/
 .cache/
 *.exe
+*.log
 *.obj
 *.o
 *.pdb
