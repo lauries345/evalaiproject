@@ -1,0 +1,5 @@
+name,quantity,category,lotNumber,expiryDate,unitPrice
+Control Solution,3,Reagent,LOT-CS-007,2026-11-01,3.750000
+Glucose Strips,60,Reagent,LOT-GS-001,2027-06-30,0.450000
+Lancets,200,Consumable,LOT-LC-042,2028-01-15,0.120000
+Test Meter,3,Device,LOT-TM-019,2031-12-31,89.990000

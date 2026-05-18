@@ -84,6 +84,7 @@ endif()
 add_library(eval_lib STATIC
     src/Item.cpp
     src/Inventory.cpp
+    src/Command.cpp
 )
 
 target_include_directories(eval_lib

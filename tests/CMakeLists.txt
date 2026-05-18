@@ -17,6 +17,7 @@
 set(TEST_SOURCES
     test_Item.cpp
     test_Inventory.cpp
+    test_Command.cpp
 )
 
 add_executable(EvalAIProject_tests ${TEST_SOURCES})

@@ -2,9 +2,9 @@
  * @file        test_Item.cpp
  * @brief       Unit tests for the eval::Item class.
  * @details     Verifies all public methods of Item:
- *              - Constructor (name + quantity storage)
- *              - getName()
- *              - getQuantity()
+ *              - Constructor (name + quantity, and full six-argument form)
+ *              - getName(), getQuantity()
+ *              - getCategory(), getLotNumber(), getExpiryDate(), getUnitPrice()
  *              - adjustQuantity() (positive, negative, and zero deltas)
  *              - Value semantics (copy and move construction/assignment)
  *
@@ -13,7 +13,7 @@
  *
  * @author      Seth Laurie
  * @date        2026-05-15
- * @version     1.1.0
+ * @version     2.0.0
  *
  * @copyright   Copyright (c) 2026. All rights reserved.
  *
@@ -36,7 +36,7 @@
 namespace {
 
 // ============================================================================
-// Construction
+// Construction — two-argument form (backward-compatible)
 // ============================================================================
 
 TEST(ItemTest, ConstructorStoresName)
@@ -65,6 +65,62 @@ TEST(ItemTest, ConstructorAcceptsNegativeQuantity)
 }
 
 // ============================================================================
+// Construction — six-argument form (extended metadata)
+// ============================================================================
+
+TEST(ItemTest, FullConstructorStoresCategory)
+{
+    const eval::Item item("Lancet", 100, "Consumable", "LOT-001", "2028-01-01", 0.12);
+    EXPECT_EQ(item.getCategory(), "Consumable");
+}
+
+TEST(ItemTest, FullConstructorStoresLotNumber)
+{
+    const eval::Item item("Lancet", 100, "Consumable", "LOT-001", "2028-01-01", 0.12);
+    EXPECT_EQ(item.getLotNumber(), "LOT-001");
+}
+
+TEST(ItemTest, FullConstructorStoresExpiryDate)
+{
+    const eval::Item item("Lancet", 100, "Consumable", "LOT-001", "2028-01-01", 0.12);
+    EXPECT_EQ(item.getExpiryDate(), "2028-01-01");
+}
+
+TEST(ItemTest, FullConstructorStoresUnitPrice)
+{
+    const eval::Item item("Lancet", 100, "Consumable", "LOT-001", "2028-01-01", 0.12);
+    EXPECT_DOUBLE_EQ(item.getUnitPrice(), 0.12);
+}
+
+// ============================================================================
+// Construction — default metadata values when only name+qty provided
+// ============================================================================
+
+TEST(ItemTest, DefaultCategoryIsEmpty)
+{
+    const eval::Item item("Widget", 5);
+    EXPECT_TRUE(item.getCategory().empty());
+}
+
+TEST(ItemTest, DefaultLotNumberIsEmpty)
+{
+    const eval::Item item("Widget", 5);
+    EXPECT_TRUE(item.getLotNumber().empty());
+}
+
+TEST(ItemTest, DefaultExpiryDateIsEmpty)
+{
+    const eval::Item item("Widget", 5);
+    EXPECT_TRUE(item.getExpiryDate().empty());
+}
+
+TEST(ItemTest, DefaultUnitPriceIsZero)
+{
+    const eval::Item item("Widget", 5);
+    EXPECT_DOUBLE_EQ(item.getUnitPrice(), 0.0);
+}
+
+// ============================================================================
 // Accessors
 // ============================================================================
 
@@ -77,7 +133,6 @@ TEST(ItemTest, GetNameReturnsCorrectString)
 TEST(ItemTest, GetNameReturnsConstReference)
 {
     const eval::Item item("Ref", 1);
-    // Verify we get a reference, not a copy, by comparing addresses.
     const std::string& ref = item.getName();
     EXPECT_EQ(&ref, &item.getName());
 }
@@ -86,6 +141,27 @@ TEST(ItemTest, GetQuantityReturnsCurrentValue)
 {
     const eval::Item item("Counter", 42);
     EXPECT_EQ(item.getQuantity(), 42);
+}
+
+TEST(ItemTest, GetCategoryReturnsConstReference)
+{
+    const eval::Item item("X", 1, "Cat", "", "", 0.0);
+    const std::string& ref = item.getCategory();
+    EXPECT_EQ(&ref, &item.getCategory());
+}
+
+TEST(ItemTest, GetLotNumberReturnsConstReference)
+{
+    const eval::Item item("X", 1, "", "LOT-99", "", 0.0);
+    const std::string& ref = item.getLotNumber();
+    EXPECT_EQ(&ref, &item.getLotNumber());
+}
+
+TEST(ItemTest, GetExpiryDateReturnsConstReference)
+{
+    const eval::Item item("X", 1, "", "", "2030-01-01", 0.0);
+    const std::string& ref = item.getExpiryDate();
+    EXPECT_EQ(&ref, &item.getExpiryDate());
 }
 
 // ============================================================================
@@ -119,7 +195,6 @@ TEST(ItemTest, AdjustQuantityMultipleCallsAccumulate)
     item.adjustQuantity(10);
     item.adjustQuantity(-3);
     item.adjustQuantity(7);
-    // Expected: 0 + 10 - 3 + 7 = 14
     EXPECT_EQ(item.getQuantity(), 14);
 }
 
@@ -134,12 +209,16 @@ TEST(ItemTest, AdjustQuantityFromNegativeBase)
 // Value semantics – copy
 // ============================================================================
 
-TEST(ItemTest, CopyConstructorReplicatesNameAndQuantity)
+TEST(ItemTest, CopyConstructorReplicatesAllFields)
 {
-    const eval::Item original("Original", 7);
+    const eval::Item original("Lancet", 100, "Consumable", "LOT-001", "2028-01-01", 0.12);
     const eval::Item copy(original);
-    EXPECT_EQ(copy.getName(),     original.getName());
-    EXPECT_EQ(copy.getQuantity(), original.getQuantity());
+    EXPECT_EQ(copy.getName(),       original.getName());
+    EXPECT_EQ(copy.getQuantity(),   original.getQuantity());
+    EXPECT_EQ(copy.getCategory(),   original.getCategory());
+    EXPECT_EQ(copy.getLotNumber(),  original.getLotNumber());
+    EXPECT_EQ(copy.getExpiryDate(), original.getExpiryDate());
+    EXPECT_DOUBLE_EQ(copy.getUnitPrice(), original.getUnitPrice());
 }
 
 TEST(ItemTest, CopyConstructorIsIndependentOfOriginal)
@@ -147,7 +226,7 @@ TEST(ItemTest, CopyConstructorIsIndependentOfOriginal)
     eval::Item original("Independent", 5);
     eval::Item copy(original);
     copy.adjustQuantity(100);
-    EXPECT_EQ(original.getQuantity(), 5);   // original must be unchanged
+    EXPECT_EQ(original.getQuantity(), 5);
     EXPECT_EQ(copy.getQuantity(),     105);
 }
 
@@ -166,7 +245,7 @@ TEST(ItemTest, CopyAssignmentIsIndependentOfSource)
     eval::Item dst("Dst", 0);
     dst = src;
     dst.adjustQuantity(-5);
-    EXPECT_EQ(src.getQuantity(), 20);   // source must be unchanged
+    EXPECT_EQ(src.getQuantity(), 20);
     EXPECT_EQ(dst.getQuantity(), 15);
 }
 
@@ -174,12 +253,16 @@ TEST(ItemTest, CopyAssignmentIsIndependentOfSource)
 // Value semantics – move
 // ============================================================================
 
-TEST(ItemTest, MoveConstructorTransfersNameAndQuantity)
+TEST(ItemTest, MoveConstructorTransfersAllFields)
 {
-    eval::Item       source("Movable", 15);
+    eval::Item       source("Movable", 15, "Device", "LOT-M", "2029-01-01", 5.0);
     const eval::Item dest(std::move(source));
-    EXPECT_EQ(dest.getName(),     "Movable");
-    EXPECT_EQ(dest.getQuantity(), 15);
+    EXPECT_EQ(dest.getName(),       "Movable");
+    EXPECT_EQ(dest.getQuantity(),   15);
+    EXPECT_EQ(dest.getCategory(),   "Device");
+    EXPECT_EQ(dest.getLotNumber(),  "LOT-M");
+    EXPECT_EQ(dest.getExpiryDate(), "2029-01-01");
+    EXPECT_DOUBLE_EQ(dest.getUnitPrice(), 5.0);
 }
 
 TEST(ItemTest, MoveAssignmentTransfersNameAndQuantity)
